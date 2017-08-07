@@ -14,34 +14,35 @@ import io.github.shen.utils._
   * Created by shen on 8/3/17.
   */
 class Lazer(beamFileLocation: String) {
-  private val config = ConfigFactory.load(beamFileLocation).getConfig("beam")
+  private val config = Utils.loadConf(beamFileLocation).getConfig("beam")
   private val appConfigMap = config.as[Map[String, String]]("app")
   private val sparkConfigMap = config.as[Map[String, String]]("spark")
   private val streamingConfig = config.getConfig("streaming")
-  private val inputConfigs = config.getConfigList("input")
-  private val outputConfigs = config.getConfigList("output")
+  private val inputConfigs = config.as[Array[Config]]("input")
+  private val outputConfigs = config.as[Array[Config]]("output")
+  val streamConfig: StreamConfig = new StreamConfig(streamingConfig)
 
   val (sc, ssc) = this.setStreamingContext()
 
   val inputBeams: Array[InputBeam] = {
-    for (config <- this.inputConfigs) yield {
+    for (config <- inputConfigs) yield {
       val kafkaInputBeam = new KafkaInputBeam(config, this.ssc)
       kafkaInputBeam
     }
   }
 
-  val outputBeams: Array[OutputBeam[String]] = {
-    for (config: Config <- this.outputConfigs) yield {
+  val outputBeams: Array[OutputBeam] = {
+    for (config: Config <- outputConfigs) yield {
       // TODO:
       //val oclass = Class.forName(config.as[String]("outputClass")).getClass
-      val kafkaOutputBeam = new KafkaOutputBeam[String](config, this.ssc)
+      val kafkaOutputBeam = new KafkaOutputBeam(config, this.ssc)
       kafkaOutputBeam
     }
   }
 
   def startAndAwaitTermination () = {
     ssc.start()
-    waitShutdownCommand(ssc, streamingConfig.as[String]("shutdownMarker"))
+    waitShutdownCommand(ssc, streamConfig.shutdownMarker)
   }
 
   private def setStreamingContext() = {
@@ -49,8 +50,8 @@ class Lazer(beamFileLocation: String) {
     val conf = new SparkConf().setAppName(appName);
     sparkConfigMap.foreach { case (k, v) => conf.setIfMissing(k, v) }
     val sc = new SparkContext(conf)
-    val ssc = new StreamingContext(sc, Seconds(streamingConfig.as[Int]("batchDuration")))
-    ssc.checkpoint(streamingConfig.as[String]("checkpointDir"))
+    val ssc = new StreamingContext(sc, streamConfig.batchDuration)
+    ssc.checkpoint(streamConfig.checkpointDir)
     (sc, ssc)
   }
 

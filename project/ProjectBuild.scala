@@ -64,20 +64,23 @@ object ProjectBuild extends Build {
     "org.apache.spark" %% "spark-streaming-kafka-0-10" % Versions.spark,
     "com.github.benfradet" %% "spark-kafka-0-10-writer" % "0.2.0",
 
+    "org.slf4j" % "slf4j-log4j12" % "1.7.21",
+    "org.slf4j" % "slf4j-api" % "1.7.21",
+
     "com.typesafe" % "config" % "1.2.1",
     "net.ceedubs" % "ficus_2.11" % "1.1.2",
     "org.scalatest" %% "scalatest" % "2.2.4" % "test"
   )
-
+/*
   val commonExcludeDependencies = Seq(
     "org.slf4j" % "slf4j-log4j12"
   )
-
+*/
   lazy val main = Project(projectName, base = file("."))
     .settings(commonSettings: _*)
     //.settings(assemblySettings: _*)
     .settings(scalacOptions ++= commonScalacOptions)
     .settings(libraryDependencies ++= commonLibraryDependencies)
-    .settings(excludeDependencies ++= commonExcludeDependencies)
+    //.settings(excludeDependencies ++= commonExcludeDependencies)
 }
 

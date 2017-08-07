@@ -13,11 +13,19 @@ import scala.reflect.ClassTag
 /**
   * Created by shen on 8/4/17.
   */
-class KafkaOutputBeam[T: ClassTag](config: Config, ssc: StreamingContext) extends OutputBeam[T] {
-  private val kafkaParams = config.as[Map[String, String]]("config.params")
-  private val kafkaTopics = config.as[Set[String]]("config.topics")
-  def write[K, V](dstream : DStream[T], transformFunc: T => ProducerRecord[K, V]) = {
+class KafkaOutputBeam(config: Config, ssc: StreamingContext) extends OutputBeam {
+  val kafkaParams = config.as[Map[String, String]]("config.params")
+  val kafkaTopics = config.as[Array[String]]("config.topics")
+  val producerConfig = Utils.map2Properties(kafkaParams)
+
+  //def write[K, V](dstream : DStream[T], transformFunc: T => ProducerRecord[K, V])
+  /*
+  def write[K, V](dstream : DStream[T]): Unit = {
     val p = Utils.map2Properties(kafkaParams)
-    dstream.writeToKafka(p, transformFunc)
+    dstream.writeToKafka(p,
+      s => new ProducerRecord[String, String](kafkaTopics(0), s.toString()))
+  }*/
+  def write[K, V](dstream : DStream[String]): Unit = {
+
   }
 }
