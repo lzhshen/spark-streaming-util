@@ -1,4 +1,4 @@
-package io.github.shen.streaming
+package io.github.shen.common
 
 /**
   * Created by shen on 8/5/17.

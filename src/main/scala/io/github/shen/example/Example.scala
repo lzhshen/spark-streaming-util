@@ -1,7 +1,7 @@
 package io.github.shen.example
 
 import io.github.shen.output.KafkaOutputBeam
-import io.github.shen.streaming._
+import io.github.shen.streaming.StreamingJob
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.rdd.RDD
@@ -27,8 +27,8 @@ object WordCount {
       .transform(toLowerCase)
       //.transform(skipStopWords(stopWordsVar))
 
-    val windowDurationVar = streamingJob.streamConfig.windowDuration
-    val slideDurationVar = streamingJob.streamConfig.slideDuration
+    val windowDurationVar = streamingJob.jobConfig.windowDuration
+    val slideDurationVar = streamingJob.jobConfig.slideDuration
     val wordCounts = words
       .map(word => (word, 1))
       .reduceByKeyAndWindow(_ + _, _ - _, windowDurationVar, slideDurationVar)

@@ -1,38 +1,32 @@
 package io.github.shen.streaming
 
-import com.typesafe.config.{Config, ConfigFactory}
-import org.apache.spark.{SparkConf, SparkContext}
-import net.ceedubs.ficus.Ficus._
-import org.apache.hadoop.conf.Configuration
-import org.apache.hadoop.fs.{FileSystem, Path}
-import org.apache.spark.streaming.{Seconds, StreamingContext}
+import com.typesafe.config.Config
+import io.github.shen.common.StreamingJobConfig
 import io.github.shen.input._
 import io.github.shen.output._
 import io.github.shen.utils._
+import org.apache.hadoop.conf.Configuration
+import org.apache.hadoop.fs.{FileSystem, Path}
+import org.apache.spark.streaming.StreamingContext
+import org.apache.spark.{SparkConf, SparkContext}
 
 /**
   * Created by shen on 8/3/17.
   */
 class StreamingJob(beamFileLocation: String) {
-  private val config = Utils.loadConf(beamFileLocation).getConfig("beam")
-  private val appConfigMap = config.as[Map[String, String]]("app")
-  private val sparkConfigMap = config.as[Map[String, String]]("spark")
-  private val streamingConfig = config.getConfig("streaming")
-  private val inputConfigs = config.as[Array[Config]]("input")
-  private val outputConfigs = config.as[Array[Config]]("output")
-  val streamConfig: StreamConfig = new StreamConfig(streamingConfig)
+  val jobConfig = new StreamingJobConfig(beamFileLocation)
 
   val (sc, ssc) = this.setStreamingContext()
 
   val inputBeams: Array[InputBeam] = {
-    for (config <- inputConfigs) yield {
+    for (config <- jobConfig.inputConfigs) yield {
       val kafkaInputBeam = new KafkaInputBeam(config, this.ssc)
       kafkaInputBeam
     }
   }
 
   val outputBeams: Array[OutputBeam] = {
-    for (config: Config <- outputConfigs) yield {
+    for (config: Config <- jobConfig.outputConfigs) yield {
       // TODO:
       //val oclass = Class.forName(config.as[String]("outputClass")).getClass
       val kafkaOutputBeam = new KafkaOutputBeam(config, this.ssc)
@@ -42,16 +36,16 @@ class StreamingJob(beamFileLocation: String) {
 
   def startAndAwaitTermination () = {
     ssc.start()
-    waitShutdownCommand(ssc, streamConfig.shutdownMarker)
+    waitShutdownCommand(ssc, jobConfig.shutdownMarker)
   }
 
   private def setStreamingContext() = {
-    val appName = appConfigMap("name")
+    val appName = jobConfig.appName
     val conf = new SparkConf().setAppName(appName);
-    sparkConfigMap.foreach { case (k, v) => conf.setIfMissing(k, v) }
+    jobConfig.sparkConfigMap.foreach { case (k, v) => conf.setIfMissing(k, v) }
     val sc = new SparkContext(conf)
-    val ssc = new StreamingContext(sc, streamConfig.batchDuration)
-    ssc.checkpoint(streamConfig.checkpointDir)
+    val ssc = new StreamingContext(sc, jobConfig.batchDuration)
+    ssc.checkpoint(jobConfig.checkpointDir)
     (sc, ssc)
   }
 
