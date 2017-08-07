@@ -1,4 +1,4 @@
-package io.github.shen.lazer
+package io.github.shen.streaming
 
 import com.typesafe.config.Config
 import org.apache.spark.streaming.{Duration, Seconds}

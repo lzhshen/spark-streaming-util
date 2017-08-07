@@ -1,4 +1,4 @@
-package io.github.shen.lazer
+package io.github.shen.streaming
 
 /**
   * Created by shen on 8/5/17.

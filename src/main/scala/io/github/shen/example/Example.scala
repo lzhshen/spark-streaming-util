@@ -1,7 +1,7 @@
 package io.github.shen.example
 
 import io.github.shen.output.KafkaOutputBeam
-import io.github.shen.lazer._
+import io.github.shen.streaming._
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.rdd.RDD
@@ -15,10 +15,10 @@ object WordCount {
   def main(args: Array[String]): Unit = {
     // Initialize beam
     val path = getClass.getResource("/exampleBeam.conf").getPath
-    val lazer = new Lazer(path)
+    val streamingJob = new StreamingJob(path)
 
     // read from kafka topcis
-    val lines = lazer.inputBeams(0).read().map(rec => rec.value())
+    val lines = streamingJob.inputBeams(0).read().map(rec => rec.value())
 
     // apply transformation on dstream
     val words = lines
@@ -27,8 +27,8 @@ object WordCount {
       .transform(toLowerCase)
       //.transform(skipStopWords(stopWordsVar))
 
-    val windowDurationVar = lazer.streamConfig.windowDuration
-    val slideDurationVar = lazer.streamConfig.slideDuration
+    val windowDurationVar = streamingJob.streamConfig.windowDuration
+    val slideDurationVar = streamingJob.streamConfig.slideDuration
     val wordCounts = words
       .map(word => (word, 1))
       .reduceByKeyAndWindow(_ + _, _ - _, windowDurationVar, slideDurationVar)
@@ -37,13 +37,13 @@ object WordCount {
     //.transform(skipEmptyWordCounts)
 
     // write to kafka topics
-    val kafkaOutputBeam = lazer.outputBeams(0).asInstanceOf[KafkaOutputBeam]
+    val kafkaOutputBeam = streamingJob.outputBeams(0).asInstanceOf[KafkaOutputBeam]
     wordCounts.writeToKafka(
       kafkaOutputBeam.producerConfig,
       s => new ProducerRecord[String, String](kafkaOutputBeam.kafkaTopics(0), s.toString())
     )
 
-    lazer.startAndAwaitTermination()
+    streamingJob.startAndAwaitTermination()
   }
 
   val toLowerCase = (words: RDD[String]) => words.map(word => word.toLowerCase)

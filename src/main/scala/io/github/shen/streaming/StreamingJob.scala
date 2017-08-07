@@ -1,4 +1,4 @@
-package io.github.shen.lazer
+package io.github.shen.streaming
 
 import com.typesafe.config.{Config, ConfigFactory}
 import org.apache.spark.{SparkConf, SparkContext}
@@ -13,7 +13,7 @@ import io.github.shen.utils._
 /**
   * Created by shen on 8/3/17.
   */
-class Lazer(beamFileLocation: String) {
+class StreamingJob(beamFileLocation: String) {
   private val config = Utils.loadConf(beamFileLocation).getConfig("beam")
   private val appConfigMap = config.as[Map[String, String]]("app")
   private val sparkConfigMap = config.as[Map[String, String]]("spark")
