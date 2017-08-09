@@ -6,7 +6,7 @@ import org.apache.spark.streaming.Seconds
   */
 
 class StreamingJobConfigSpecs extends UnitSpec {
-  val path = getClass.getResource("/exampleBeam.conf").getPath
+  val path = getClass.getResource("/streamingJobFull.conf").getPath
   val jobConfig = new StreamingJobConfig(path)
   "valid application configuration" should "have correct application name" in {
       val appName = jobConfig.appConfig.name
@@ -67,5 +67,23 @@ class StreamingJobConfigSpecs extends UnitSpec {
       "value.serializer" -> "org.apache.kafka.common.serialization.StringSerializer",
       "acks" -> "all"
     ))
+  }
+
+  val path2 = getClass.getResource("/streamingJobPartial.conf").getPath
+  val jobConfig2 = new StreamingJobConfig(path2)
+  "streaming configuration" should "have default batch duration" in {
+    assert(jobConfig2.streamingConfig.batchDuration == Seconds(5))
+  }
+  it should "have default window duration" in {
+    assert(jobConfig2.streamingConfig.windowDuration == Seconds(20))
+  }
+  it should "have default slide duration" in {
+    assert(jobConfig2.streamingConfig.slideDuration == Seconds(10))
+  }
+  it should "have default checkpoint directory" in {
+    assert(jobConfig2.streamingConfig.checkpointDir == "/tmp/checkpoint")
+  }
+  it should "have default shutdown marker file " in {
+    assert(jobConfig2.streamingConfig.shutdownMarker == "/tmp/shutdownMarker")
   }
 }
