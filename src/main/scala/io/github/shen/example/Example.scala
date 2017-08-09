@@ -27,8 +27,8 @@ object WordCount {
       .transform(toLowerCase)
       //.transform(skipStopWords(stopWordsVar))
 
-    val windowDurationVar = streamingJob.jobConfig.windowDuration
-    val slideDurationVar = streamingJob.jobConfig.slideDuration
+    val windowDurationVar = streamingJob.jobConfig.streamingConfig.windowDuration
+    val slideDurationVar = streamingJob.jobConfig.streamingConfig.slideDuration
     val wordCounts = words
       .map(word => (word, 1))
       .reduceByKeyAndWindow(_ + _, _ - _, windowDurationVar, slideDurationVar)
@@ -40,7 +40,7 @@ object WordCount {
     val kafkaOutputBeam = streamingJob.outputBeams(0).asInstanceOf[KafkaOutputBeam]
     wordCounts.writeToKafka(
       kafkaOutputBeam.producerConfig,
-      s => new ProducerRecord[String, String](kafkaOutputBeam.kafkaTopics(0), s.toString())
+      s => new ProducerRecord[String, String](kafkaOutputBeam.config.topics(0), s.toString())
     )
 
     streamingJob.startAndAwaitTermination()

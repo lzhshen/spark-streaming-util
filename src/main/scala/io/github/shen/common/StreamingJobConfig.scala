@@ -10,27 +10,49 @@ import scala.concurrent.duration.FiniteDuration
   */
 
 class StreamingJobConfig(configFile: String) {
-  val config = Utils.loadConf(configFile).getConfig("beam")
-  val appConfigMap = config.as[Map[String, String]]("app")
-  val sparkConfigMap = config.as[Map[String, String]]("spark")
-  private val streamingConfig = config.getConfig("streaming")
-  val inputConfigs = config.as[Array[Config]]("input")
-  val outputConfigs = config.as[Array[Config]]("output")
-  val batchDuration: Duration = Seconds(streamingConfig.as[FiniteDuration]("batchDuration").toSeconds)
-  val windowDuration: Duration = Seconds(streamingConfig.as[FiniteDuration]("windowDuration").toSeconds)
-  val slideDuration: Duration = Seconds(streamingConfig.as[FiniteDuration]("slideDuration").toSeconds)
-  val checkpointDir: String = streamingConfig.getString("checkpointDir")
-  val shutdownMarker: String = streamingConfig.getString("shutdownMarker")
-  val appName: String = appConfigMap("name")
+  private val rootConfig : Config = Utils.loadConf(configFile)
+  val appConfig = new AppConfig(rootConfig.getConfig("streamingJob.app"))
+  val sparkConfig = new SparkConfig(rootConfig.getConfig("streamingJob.spark"))
+  val streamingConfig: StreamingConfig = new StreamingConfig(rootConfig.getConfig("streamingJob.streaming"))
+  val inputBeamConfigs: Array[BeamConfig] =
+    for (config <- rootConfig.as[Array[Config]]("streamingJob.input")) yield {
+      val beamConfig = new BeamConfig(config)
+      beamConfig
+  }
+  val outputBeamConfigs: Array[BeamConfig] =
+    for (config <- rootConfig.as[Array[Config]]("streamingJob.output")) yield {
+      val beamConfig = new BeamConfig(config)
+      beamConfig
+    }
 }
 
-object KafkaConfig {
-  def getKafkaParamsMap(cfg: Config): Map[String, String] = {
-    cfg.as[Map[String, String]]("config.params")
-  }
-
-  def getKafkaTopicsArray(cfg: Config) = {
-    cfg.as[Array[String]]("config.topics")
-  }
+class AppConfig(config: Config) {
+  config.resolve()
+  val name = config.as[Option[String]]("name").getOrElse("defaultStreamingJobName")
+  val params = config.as[Option[Map[String, String]]]("params").getOrElse(Map[String, String]())
 }
 
+class SparkConfig(config: Config) {
+  config.resolve()
+  val params = config.as[Option[Map[String, String]]]("params").getOrElse(Map[String, String]())
+}
+
+class BeamConfig(config: Config) {
+  config.resolve()
+  val topics: Array[String] = config.as[Array[String]]("config.topics")
+  val params: Map[String, String] = config.as[Map[String, String]]("config.params")
+}
+
+class StreamingConfig(config: Config) {
+    config.resolve()
+    val batchDuration: Duration =
+      Seconds(config.as[Option[FiniteDuration]]("batchDuration").getOrElse(FiniteDuration(5,"s")).toSeconds)
+    val windowDuration: Duration =
+      Seconds(config.as[Option[FiniteDuration]]("windowDuration").getOrElse(FiniteDuration(20,"s")).toSeconds)
+    val slideDuration: Duration =
+      Seconds(config.as[Option[FiniteDuration]]("slideDuration").getOrElse(FiniteDuration(10,"s")).toSeconds)
+    val checkpointDir: String =
+      config.as[Option[String]]("checkpointDir").getOrElse("/tmp/checkpoint")
+    val shutdownMarker: String =
+      config.as[Option[String]]("shutdownMarker").getOrElse("/tmp/shutdownMarker")
+}

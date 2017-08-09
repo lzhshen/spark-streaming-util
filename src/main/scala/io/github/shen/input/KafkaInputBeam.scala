@@ -10,13 +10,13 @@ import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.spark.streaming.dstream.DStream
 import io.github.shen.common._
 
-class KafkaInputBeam(config: Config, ssc: StreamingContext) extends InputBeam {
-  private val kafkaParams = KafkaConfig.getKafkaParamsMap(config)
-  private val kafkaTopics = KafkaConfig.getKafkaTopicsArray(config)
+class KafkaInputBeam(beamConfig: BeamConfig, ssc: StreamingContext) extends InputBeam {
   private val preferredHosts = LocationStrategies.PreferConsistent
-  private val consumerStrategy = ConsumerStrategies.Subscribe[String, String](kafkaTopics, kafkaParams)
+  private val consumerStrategy =
+    ConsumerStrategies.Subscribe[String, String](beamConfig.topics, beamConfig.params)
   private val beam : DStream[ConsumerRecord[String, String]] =
     KafkaUtils.createDirectStream[String, String](ssc, preferredHosts, consumerStrategy)
+  val config: BeamConfig = beamConfig
 
   def read() : DStream[ConsumerRecord[String, String]] = { this.beam }
 }

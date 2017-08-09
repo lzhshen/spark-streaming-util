@@ -9,10 +9,9 @@ import io.github.shen.common._
 /**
   * Created by shen on 8/4/17.
   */
-class KafkaOutputBeam(config: Config, ssc: StreamingContext) extends OutputBeam {
-  val kafkaParams = KafkaConfig.getKafkaParamsMap(config)
-  val kafkaTopics = KafkaConfig.getKafkaTopicsArray(config)
-  val producerConfig = Utils.map2Properties(kafkaParams)
+class KafkaOutputBeam(beamConfig: BeamConfig, ssc: StreamingContext) extends OutputBeam {
+  val producerConfig = Utils.map2Properties(beamConfig.params)
+  val config: BeamConfig = beamConfig
 
   //def write[K, V](dstream : DStream[T], transformFunc: T => ProducerRecord[K, V])
   /*
