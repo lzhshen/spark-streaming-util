@@ -1,4 +1,4 @@
-package io.github.shen.example
+package io.github.shen.example.wordcount
 
 import io.github.shen.output.KafkaOutputBeam
 import io.github.shen.streaming.StreamingJob
