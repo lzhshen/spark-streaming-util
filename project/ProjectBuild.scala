@@ -23,8 +23,8 @@ object ProjectBuild extends Build {
   object Versions {
     val kafka = "0.10.0.0"
     val spark = "2.1.0"
-    val scala = "2.11.8"
-    //val scala = "2.10.5"
+    //val scala = "2.11.8"
+    val scala = "2.10.6"
   }
 
   val projectName = "spark-streaming-util"
@@ -84,7 +84,8 @@ object ProjectBuild extends Build {
     "org.slf4j" % "slf4j-api" % "1.7.21",
 
     "com.typesafe" % "config" % "1.2.1",
-    "net.ceedubs" %% "ficus" % "1.1.2",
+    //"net.ceedubs" %% "ficus" % "1.1.2",
+    "net.ceedubs" %% "ficus" % "1.0.1",
     "org.scalatest" %% "scalatest" % "2.2.4" % "test"
   )
 /*

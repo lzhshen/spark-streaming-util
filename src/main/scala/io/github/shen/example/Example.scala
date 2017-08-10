@@ -15,7 +15,7 @@ object WordCount {
   def main(args: Array[String]): Unit = {
     // Initialize streaming job
     val path = if (args.length == 0) {
-      getClass.getResource("/exampleBeam.conf").getPath
+      getClass.getResource("/workcount-dev.conf").getPath
     } else {
       args(0)
     }
