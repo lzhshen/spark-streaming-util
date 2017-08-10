@@ -23,13 +23,14 @@ object ProjectBuild extends Build {
     val kafka = "0.10.0.0"
     val spark = "2.1.0"
     val scala = "2.11.8"
+    //val scala = "2.10.5"
   }
 
   val projectName = "spark-streaming-util"
 
   val commonSettings = Seq(
     version := "1.0",
-    organization := "http://mkuthan.github.io/",
+    organization := "https://github.com/lzhshen",
     scalaVersion := Versions.scala,
     fork := true,
     parallelExecution in Test := false,
@@ -51,14 +52,16 @@ object ProjectBuild extends Build {
   )
 
   val commonLibraryDependencies = Seq(
-    "org.scala-lang" % "scala-compiler" % Versions.scala,
-    "org.scala-lang" % "scala-library" % Versions.scala,
-    "org.scala-lang" % "scala-reflect" % Versions.scala,
+    //"org.scala-lang" % "scala-compiler" % Versions.scala,
+    //"org.scala-lang" % "scala-library" % Versions.scala,
+    //"org.scala-lang" % "scala-reflect" % Versions.scala,
 
     "org.apache.kafka" %% "kafka" % Versions.kafka,
+    //"org.apache.kafka" %% "kafka-clients" % Versions.kafka,
     "org.apache.kafka" % "kafka-clients" % Versions.kafka,
 
-    "org.apache.spark" %% "spark-core" % Versions.spark,
+
+  "org.apache.spark" %% "spark-core" % Versions.spark,
     "org.apache.spark" %% "spark-streaming" % Versions.spark,
     "org.apache.spark" %% "spark-sql" % Versions.spark,
     "org.apache.spark" %% "spark-streaming-kafka-0-10" % Versions.spark,
@@ -68,7 +71,7 @@ object ProjectBuild extends Build {
     "org.slf4j" % "slf4j-api" % "1.7.21",
 
     "com.typesafe" % "config" % "1.2.1",
-    "net.ceedubs" % "ficus_2.11" % "1.1.2",
+    "net.ceedubs" %% "ficus" % "1.1.2",
     "org.scalatest" %% "scalatest" % "2.2.4" % "test"
   )
 /*

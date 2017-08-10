@@ -13,11 +13,15 @@ import com.github.benfradet.spark.kafka010.writer._
 object WordCount {
   type WordCount = (String, Int)
   def main(args: Array[String]): Unit = {
-    // Initialize beam
-    val path = getClass.getResource("/exampleBeam.conf").getPath
+    // Initialize streaming job
+    val path = if (args.length == 0) {
+      getClass.getResource("/exampleBeam.conf").getPath
+    } else {
+      args(0)
+    }
     val streamingJob = new StreamingJob(path)
 
-    // read from kafka topcis
+    // read data from kafka topcis
     val lines = streamingJob.inputBeams(0).read().map(rec => rec.value())
 
     // apply transformation on dstream
@@ -36,13 +40,14 @@ object WordCount {
     wordCounts.transform(sortWordCounts)
     //.transform(skipEmptyWordCounts)
 
-    // write to kafka topics
+    // write data back to kafka topics
     val kafkaOutputBeam = streamingJob.outputBeams(0).asInstanceOf[KafkaOutputBeam]
     wordCounts.writeToKafka(
       kafkaOutputBeam.producerConfig,
       s => new ProducerRecord[String, String](kafkaOutputBeam.config.topics(0), s.toString())
     )
 
+    // start streaming job
     streamingJob.startAndAwaitTermination()
   }
 
