@@ -16,6 +16,7 @@
 
 import sbt.Keys._
 import sbt._
+import sbtassembly.{MergeStrategy, PathList}
 
 object ProjectBuild extends Build {
 
@@ -37,6 +38,19 @@ object ProjectBuild extends Build {
     cancelable in Global := true
   )
 
+  val customMergeStrategy: String => MergeStrategy = {
+    case PathList("local.conf") => MergeStrategy.discard
+    case PathList("org", "apache", "spark", "unused", "UnusedStubClass.class") => MergeStrategy.discard
+    case PathList("org", "apache", "commons", xs @ _ *) => MergeStrategy.last
+    case PathList("org", "apache", "hadoop", "yarn", xs @ _ *) => MergeStrategy.last
+    case PathList("org", "apache", "spark", xs @ _ *) => MergeStrategy.last
+    case PathList("org", "aopalliance", xs @ _ *) => MergeStrategy.last
+    case PathList("javax","inject", xs @ _ *) => MergeStrategy.last
+    case "overview.html" => MergeStrategy.discard
+    case s =>
+      MergeStrategy.defaultMergeStrategy(s)
+  }
+
   val commonScalacOptions = Seq(
     "-deprecation",
     "-encoding", "UTF-8",
@@ -57,11 +71,10 @@ object ProjectBuild extends Build {
     //"org.scala-lang" % "scala-reflect" % Versions.scala,
 
     "org.apache.kafka" %% "kafka" % Versions.kafka,
-    //"org.apache.kafka" %% "kafka-clients" % Versions.kafka,
     "org.apache.kafka" % "kafka-clients" % Versions.kafka,
 
 
-  "org.apache.spark" %% "spark-core" % Versions.spark,
+    "org.apache.spark" %% "spark-core" % Versions.spark,
     "org.apache.spark" %% "spark-streaming" % Versions.spark,
     "org.apache.spark" %% "spark-sql" % Versions.spark,
     "org.apache.spark" %% "spark-streaming-kafka-0-10" % Versions.spark,
