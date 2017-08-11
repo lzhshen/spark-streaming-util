@@ -8,7 +8,7 @@ import org.apache.spark.streaming.dstream.DStream
 /**
   * Created by shen on 8/10/17.
   */
-object ServiceLogParser {
+object MgmtviewLogParser {
 
   val fields: List[String] = List("timestamp", "loglevel", "reqTimeStamp",
     "uuid", "traceId", "txCodeDetails", "compId", "insId", "userId",
@@ -18,8 +18,7 @@ object ServiceLogParser {
     "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0") // TODO:
   var orgMap: Map[String, OrgInfoRec] = Map()
 
-  def parse(ssc: StreamingContext,
-            lines: DStream[String],
+  def parse(lines: DStream[String],
             orgMapBC: Broadcast[Map[String, OrgInfoRec]]): DStream[String] = {
     orgMap = orgMapBC.value
     val docs = lines.transform(extractMessageField).transform(map2String)

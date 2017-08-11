@@ -43,13 +43,13 @@ class ServiceLogParserSpec extends FlatSpec with GivenWhenThen with Matchers wit
       |230000000,建行黑龙江省分行,111111111,中国建设银行,2015/9/26,2999/12/31,
       |,,0001/1/1,2015/9/26,dim_new_gen_ccb_inst_hier_c_a0300.pl,,0,2999/12/31""".stripMargin.replaceAll("\n", ""))
   val orgInfoMap = Map("230291138" -> orgInfoRec)
-  ServiceLogParser.setOrgMap(orgInfoMap)
+  MgmtviewLogParser.setOrgMap(orgInfoMap)
 
 
   "Raw json doc from kafka" should "be converted" in {
     val rawDoc = Seq(inputDoc)
 
-    val m = ServiceLogParser.extractMessageField(sc.parallelize(rawDoc)).collect()
+    val m = MgmtviewLogParser.extractMessageField(sc.parallelize(rawDoc)).collect()
 
     m shouldBe Array(outputMap)
   }

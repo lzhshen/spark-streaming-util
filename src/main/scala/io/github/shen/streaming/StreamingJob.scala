@@ -9,6 +9,10 @@ import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.spark.streaming.StreamingContext
 import org.apache.spark.{SparkConf, SparkContext}
 
+
+import org.apache.spark.sql.functions._
+import org.apache.spark.sql.SparkSession
+
 /**
   * Created by shen on 8/3/17.
   */
@@ -19,17 +23,23 @@ class StreamingJob(beamFileLocation: String) {
 
   val inputBeams: Array[InputBeam] =
     for (beamConfig: BeamConfig <- jobConfig.inputBeamConfigs) yield {
+      /*
       val kafkaInputBeam = new KafkaInputBeam(beamConfig, this.ssc)
       kafkaInputBeam
+       */
+      val inputBeam =  Utils.newObjectFromClassName(beamConfig.clsname, beamConfig, this.ssc)
+      inputBeam.asInstanceOf[InputBeam]
     }
 
 
   val outputBeams: Array[OutputBeam] = {
     for (beamConfig: BeamConfig <- jobConfig.outputBeamConfigs) yield {
-      // TODO:
-      //val oclass = Class.forName(config.as[String]("outputClass")).getClass
+      /*
       val kafkaOutputBeam = new KafkaOutputBeam(beamConfig, this.ssc)
       kafkaOutputBeam
+      */
+      val outputBeam =  Utils.newObjectFromClassName(beamConfig.clsname, beamConfig, this.ssc)
+      outputBeam.asInstanceOf[OutputBeam]
     }
   }
 
@@ -47,7 +57,20 @@ class StreamingJob(beamFileLocation: String) {
     ssc.checkpoint(jobConfig.streamingConfig.checkpointDir)
     (sc, ssc)
   }
+/*
+  private def setSparkSession(): SparkSession = {
 
+    val appName = jobConfig.appConfig.name
+    val conf = new SparkConf().setAppName(appName);
+    jobConfig.sparkConfig.params.foreach { case (k, v) => conf.setIfMissing(k, v) }
+
+    val spark = SparkSession
+      .builder
+      .config(conf)
+      .getOrCreate()
+
+  }
+*/
   private def waitShutdownCommand(ssc: StreamingContext, shutdownMarker: String): Unit = {
     var stopFlag: Boolean = false
     val checkIntervalMillis: Long = 10000

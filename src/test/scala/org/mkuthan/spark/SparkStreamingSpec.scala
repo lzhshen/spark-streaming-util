@@ -28,7 +28,7 @@ trait SparkStreamingSpec extends SparkSpec {
   import java.util.concurrent.TimeUnit
 
   import ClockWrapper._
-  
+
   private var _ssc: StreamingContext = _
 
   override def beforeAll(): Unit = {

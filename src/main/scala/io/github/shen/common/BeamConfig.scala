@@ -10,4 +10,5 @@ class BeamConfig(config: Config) extends Serializable {
   config.resolve()
   val topics: Array[String] = config.as[Array[String]]("config.topics")
   val params: Map[String, String] = config.as[Map[String, String]]("config.params")
+  val clsname: String = config.as[String]("class")
 }

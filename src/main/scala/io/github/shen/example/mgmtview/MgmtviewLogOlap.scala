@@ -24,9 +24,9 @@ object MgmtviewLogOlap {
     val orgMap = streamingJob.sc.textFile(orgFile).collect().drop(1).map(OrgLogParser.parse).map(o => (o.InsID, o)).toMap
     val orgMapBC = streamingJob.sc.broadcast(orgMap)
 
-    // read data from kafka topcis
+    // read data from kafka topcis and apply transformations
     val lines = streamingJob.inputBeams(0).read().map(_.value())
-    val docs = ServiceLogParser.parse(streamingJob.ssc, lines, orgMapBC)
+    val docs = MgmtviewLogParser.parse(lines, orgMapBC)
     docs.persist(StorageLevel.MEMORY_ONLY_SER)
 
     // write data back to kafka topics

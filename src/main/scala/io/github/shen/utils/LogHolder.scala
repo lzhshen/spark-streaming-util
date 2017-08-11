@@ -39,4 +39,16 @@ object Utils {
     map foreach { case (key,value) => props.put(key, value)}
     props
   }
+
+  def newObjectFromClassName(clz: String, params: Any*): AnyRef = {
+    val p2: Seq[Object] = params.flatMap {
+      case o: Object => Some(o)
+      case _ => None
+    }
+
+    val paramClasses: Seq[Class[_]] = p2.map(_.getClass)
+
+    Class.forName(clz).getConstructor(paramClasses :_*).
+      newInstance(p2 :_*).asInstanceOf[AnyRef]
+  }
 }
