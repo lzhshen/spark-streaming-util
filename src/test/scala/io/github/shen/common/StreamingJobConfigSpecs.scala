@@ -43,8 +43,8 @@ class StreamingJobConfigSpecs extends UnitSpec {
   }
 
   "valid input beam" should "have correct topics" in {
-    assert(jobConfig.inputBeamConfigs(0).topics(0) == "input1")
-    assert(jobConfig.inputBeamConfigs(0).topics(1) == "input2")
+    assert(jobConfig.inputBeamConfigs(0).topics.get(0) == "input1")
+    assert(jobConfig.inputBeamConfigs(0).topics.get(1) == "input2")
   }
   it should "have correct parameters" in {
     assert(jobConfig.inputBeamConfigs(0).params == Map[String, String](
@@ -58,7 +58,7 @@ class StreamingJobConfigSpecs extends UnitSpec {
   }
 
   "valid output beam" should "have correct topics" in {
-    assert(jobConfig.outputBeamConfigs(0).topics(0) == "output")
+    assert(jobConfig.outputBeamConfigs(0).topics.get(0) == "output")
   }
   it should "have correct parameters" in {
     assert(jobConfig.outputBeamConfigs(0).params == Map[String, String](

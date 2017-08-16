@@ -8,7 +8,7 @@ import net.ceedubs.ficus.Ficus._
 
 class BeamConfig(config: Config) extends Serializable {
   config.resolve()
-  val topics: Array[String] = config.as[Array[String]]("config.topics")
+  val topics: Option[Array[String]] = config.as[Option[Array[String]]]("config.topics")
   val params: Map[String, String] = config.as[Map[String, String]]("config.params")
   val clsname: String = config.as[String]("class")
 }

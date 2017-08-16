@@ -23,23 +23,31 @@ class StreamingJob(beamFileLocation: String) {
 
   val inputBeams: Array[InputBeam] =
     for (beamConfig: BeamConfig <- jobConfig.inputBeamConfigs) yield {
-      /*
-      val kafkaInputBeam = new KafkaInputBeam(beamConfig, this.ssc)
-      kafkaInputBeam
-       */
-      val inputBeam =  Utils.newObjectFromClassName(beamConfig.clsname, beamConfig, this.ssc)
-      inputBeam.asInstanceOf[InputBeam]
+      val clsname = beamConfig.clsname
+      val inputBeam = clsname match {
+        case "io.github.shen.input.KafkaInputBeam" =>
+          Utils.newObjectFromClassName(clsname, beamConfig, this.ssc).asInstanceOf[KafkaInputBeam]
+        case "io.github.shen.input.HdfsInputBeam" =>
+          Utils.newObjectFromClassName(clsname, beamConfig, this.sc).asInstanceOf[HdfsInputBeam]
+      }
+      inputBeam
     }
 
 
   val outputBeams: Array[OutputBeam] = {
     for (beamConfig: BeamConfig <- jobConfig.outputBeamConfigs) yield {
       /*
-      val kafkaOutputBeam = new KafkaOutputBeam(beamConfig, this.ssc)
-      kafkaOutputBeam
-      */
       val outputBeam =  Utils.newObjectFromClassName(beamConfig.clsname, beamConfig, this.ssc)
       outputBeam.asInstanceOf[OutputBeam]
+      */
+      val clsname = beamConfig.clsname
+      val outputBeam = clsname match {
+        case "io.github.shen.output.KafkaOutputBeam" =>
+          Utils.newObjectFromClassName(clsname, beamConfig, this.ssc).asInstanceOf[KafkaOutputBeam]
+        case "io.github.shen.output.HdfsOutputBeam" =>
+          Utils.newObjectFromClassName(clsname, beamConfig, this.sc).asInstanceOf[HdfsOutputBeam]
+      }
+      outputBeam
     }
   }
 

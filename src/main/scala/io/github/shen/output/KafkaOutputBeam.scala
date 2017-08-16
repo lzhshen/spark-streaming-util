@@ -18,9 +18,13 @@ class KafkaOutputBeam(beamConfig: BeamConfig, ssc: StreamingContext) extends Out
   def write[K, V](dstream : DStream[T]): Unit = {
     val p = Utils.map2Properties(kafkaParams)
     dstream.writeToKafka(p,
-      s => new ProducerRecord[String, String](kafkaTopics(0), s.toString()))
+      s => new ProducerRecord[String, String](kafkaTopics.get(0), s.toString()))
   }*/
-  def write[K, V](dstream : DStream[String]): Unit = {
+  def write(dstream : DStream[String]): Unit = {
+
+  }
+
+  def write(anyRef: AnyRef): Unit = {
 
   }
 }

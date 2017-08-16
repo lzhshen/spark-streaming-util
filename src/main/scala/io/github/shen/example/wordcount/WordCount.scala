@@ -5,6 +5,7 @@ import io.github.shen.streaming.StreamingJob
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.rdd.RDD
+import io.github.shen.input._
 import com.github.benfradet.spark.kafka010.writer._
 
 /**
@@ -22,7 +23,8 @@ object WordCount {
     val streamingJob = new StreamingJob(path)
 
     // read data from kafka topcis
-    val lines = streamingJob.inputBeams(0).read().map(rec => rec.value())
+    val kafkaInputBeam = streamingJob.inputBeams(0).asInstanceOf[KafkaInputBeam]
+    val lines = kafkaInputBeam.read().map(rec => rec.value())
 
     // apply transformation on dstream
     val words = lines
@@ -44,7 +46,7 @@ object WordCount {
     val kafkaOutputBeam = streamingJob.outputBeams(0).asInstanceOf[KafkaOutputBeam]
     wordCounts.writeToKafka(
       kafkaOutputBeam.producerConfig,
-      s => new ProducerRecord[String, String](kafkaOutputBeam.config.topics(0), s.toString())
+      s => new ProducerRecord[String, String](kafkaOutputBeam.config.topics.get(0), s.toString())
     )
 
     // start streaming job

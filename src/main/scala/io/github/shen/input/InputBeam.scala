@@ -6,5 +6,6 @@ import org.apache.spark.streaming.dstream.DStream
   * Created by shen on 8/3/17.
   */
 trait InputBeam {
-  def read(): DStream[ConsumerRecord[String, String]]
+  //def read(): DStream[ConsumerRecord[String, String]]
+  def read(): AnyRef
 }

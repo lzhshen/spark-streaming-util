@@ -9,6 +9,5 @@ import scala.reflect.ClassTag
   * Created by shen on 8/3/17.
   */
 abstract class OutputBeam extends Serializable {
-  def write[K, V](dstream : DStream[String]): Unit
-  //def write[K, V](dstream : DStream[T], transformFunc: T => ProducerRecord[K, V]): Unit
+  def write(anyRef: AnyRef): Unit
 }
