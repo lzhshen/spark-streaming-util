@@ -4,6 +4,7 @@ import com.github.benfradet.spark.kafka010.writer._
 import io.github.shen.input.{HdfsInputBeam, KafkaInputBeam}
 import io.github.shen.output.KafkaOutputBeam
 import io.github.shen.streaming.StreamingJob
+import io.github.shen.utils._
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.rdd.RDD
@@ -37,7 +38,7 @@ object MgmtviewLogOlap {
       .transform(extractMessageFromFilebeatLog)
       .map(MgmtviewLogRec(_))
       .transform(joinWithOrgMap(orgMapBC))
-      .transform(convertToJsonString)
+      .transform(toJsonString)
 
     docs.persist(StorageLevel.MEMORY_ONLY_SER)
 
@@ -74,10 +75,9 @@ object MgmtviewLogOlap {
       })
     }
 
-  val convertToJsonString = (mgmtviewLogRecs: RDD[MgmtviewLogRecWithOrg]) => {
+  val toJsonString = (mgmtviewLogRecs: RDD[MgmtviewLogRecWithOrg]) => {
     mgmtviewLogRecs.map(rec => {
-      val m: Map[String, String] = Map("instandId" -> rec.mgmtLog.insId,
-                                       "Inst_Chn_ShrtNm" -> rec.org.Inst_Chn_ShrtNm)
+      val m: Map[String, Any] = Utils.ccToMap(rec.mgmtLog) ++ Utils.ccToMap(rec.org)
       scala.util.parsing.json.JSONObject(m).toString()
     })
   }

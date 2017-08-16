@@ -51,4 +51,11 @@ object Utils {
     Class.forName(clz).getConstructor(paramClasses :_*).
       newInstance(p2 :_*).asInstanceOf[AnyRef]
   }
+
+  def ccToMap(cc: AnyRef) =
+    (Map[String, Any]() /: cc.getClass.getDeclaredFields) {
+      (a, f) =>
+        f.setAccessible(true)
+        a + (f.getName -> f.get(cc))
+    }
 }
