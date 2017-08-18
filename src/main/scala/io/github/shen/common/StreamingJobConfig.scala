@@ -12,6 +12,13 @@ class StreamingJobConfig(configFile: String) {
   val appConfig = new AppConfig(rootConfig.getConfig("streamingJob.app"))
   val sparkConfig = new SparkConfig(rootConfig.getConfig("streamingJob.spark"))
   val streamingConfig: StreamingConfig = new StreamingConfig(rootConfig.getConfig("streamingJob.streaming"))
+  // "security" configuration is optional
+  val securityConfig: Option[SecurityConfig] = {
+    rootConfig.as[Option[Config]]("security") match {
+      case Some(cfg) => Option(SecurityConfig(cfg))
+      case None => None
+    }
+  }
   val inputBeamConfigs: Array[BeamConfig] =
     for (config <- rootConfig.as[Array[Config]]("streamingJob.input")) yield {
       val beamConfig = new BeamConfig(config)

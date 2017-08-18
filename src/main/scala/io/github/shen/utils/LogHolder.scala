@@ -18,19 +18,27 @@ object LogHolder extends Serializable {
 
 object Utils {
   private val HDFS_IMPL_KEY = "fs.hdfs.impl"
-  def loadConf(pathToConf: String): Config = {
-    val path = new Path(pathToConf)
-    val confFile = File.createTempFile(path.getName, "tmp")
-    confFile.deleteOnExit()
-    getFileSystemByUri(path.toUri).copyToLocalFile(path, new Path(confFile.getAbsolutePath))
 
-    ConfigFactory.parseFile(confFile)
-  }
-
-  def getFileSystemByUri(uri: URI) : FileSystem  = {
+  private def getFileSystemByUri(uri: URI) : FileSystem  = {
     val hdfsConf = new Configuration()
     hdfsConf.set(HDFS_IMPL_KEY, classOf[org.apache.hadoop.hdfs.DistributedFileSystem].getName)
     FileSystem.get(uri, hdfsConf)
+  }
+
+  def loadConf(pathToConf: String): Config = {
+    val localPathRE = "[file://]*(/.*)".r
+    val hdfsPathRE = "hdfs://(/.*)".r
+    val confFile = pathToConf.toLowerCase() match {
+      case localPathRE(p) => new File(p)
+      case hdfsPathRE(p) => {
+        val path = new Path(p)
+        val localTempFile = File.createTempFile(path.getName, "tmp")
+        localTempFile.deleteOnExit()
+        getFileSystemByUri(path.toUri).copyToLocalFile(path, new Path(localTempFile.getAbsolutePath))
+        localTempFile
+      }
+    }
+    ConfigFactory.parseFile(confFile)
   }
 
   import scala.language.implicitConversions
