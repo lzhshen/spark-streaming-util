@@ -8,10 +8,7 @@ import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.spark.streaming.StreamingContext
 import org.apache.spark.{SparkConf, SparkContext}
-
-
-import org.apache.spark.sql.functions._
-import org.apache.spark.sql.SparkSession
+import com.huawei.hadoop.security._
 
 /**
   * Created by shen on 8/3/17.
@@ -19,6 +16,7 @@ import org.apache.spark.sql.SparkSession
 class StreamingJob(beamFileLocation: String) {
   val jobConfig = new StreamingJobConfig(beamFileLocation)
 
+  this.login()
   val (sc, ssc) = this.setStreamingContext()
 
   val inputBeams: Array[InputBeam] =
@@ -55,6 +53,16 @@ class StreamingJob(beamFileLocation: String) {
     waitShutdownCommand(ssc, jobConfig.streamingConfig.shutdownMarker)
   }
 
+  private def login() = {
+    jobConfig.securityConfig match {
+      case Some(config) => {
+        val hadoopConf: Configuration = new Configuration()
+        LoginUtil.login(config.userPrinciple, config.userKeytabPath, config.krb5ConfPath, hadoopConf)
+      }
+      case None => {}
+    }
+  }
+
   private def setStreamingContext() = {
     val appName = jobConfig.appConfig.name
     val conf = new SparkConf().setAppName(appName);
@@ -64,20 +72,7 @@ class StreamingJob(beamFileLocation: String) {
     ssc.checkpoint(jobConfig.streamingConfig.checkpointDir)
     (sc, ssc)
   }
-/*
-  private def setSparkSession(): SparkSession = {
 
-    val appName = jobConfig.appConfig.name
-    val conf = new SparkConf().setAppName(appName);
-    jobConfig.sparkConfig.params.foreach { case (k, v) => conf.setIfMissing(k, v) }
-
-    val spark = SparkSession
-      .builder
-      .config(conf)
-      .getOrCreate()
-
-  }
-*/
   private def waitShutdownCommand(ssc: StreamingContext, shutdownMarker: String): Unit = {
     var stopFlag: Boolean = false
     val checkIntervalMillis: Long = 10000

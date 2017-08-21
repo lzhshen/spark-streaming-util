@@ -14,7 +14,7 @@ class StreamingJobConfig(configFile: String) {
   val streamingConfig: StreamingConfig = new StreamingConfig(rootConfig.getConfig("streamingJob.streaming"))
   // "security" configuration is optional
   val securityConfig: Option[SecurityConfig] = {
-    rootConfig.as[Option[Config]]("security") match {
+    rootConfig.as[Option[Config]]("streamingJob.security") match {
       case Some(cfg) => Option(SecurityConfig(cfg))
       case None => None
     }

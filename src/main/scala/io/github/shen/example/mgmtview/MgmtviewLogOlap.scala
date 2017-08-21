@@ -18,7 +18,8 @@ import scala.util.parsing.json.JSON
 object MgmtviewLogOlap {
   def main(args: Array[String]): Unit = {
     val path = if (args.length == 0) {
-      getClass.getResource("/mgmtviewLogOlap2-dev.conf").getPath
+      //getClass.getResource("/mgmtviewLogOlap2-dev.conf").getPath
+      getClass.getResource("/mgmtviewLogOlap2-security.conf").getPath
     } else {
       args(0)
     }
