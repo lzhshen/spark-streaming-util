@@ -33,7 +33,6 @@ class StreamingJob(beamFileLocation: String) {
       inputBeam
     }
 
-
   val outputBeams: Array[OutputBeam] = {
     for (beamConfig: BeamConfig <- jobConfig.outputBeamConfigs) yield {
       /*

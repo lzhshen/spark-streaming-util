@@ -26,9 +26,9 @@ object Utils {
   }
 
   def loadConf(pathToConf: String): Config = {
-    val localPathRE = "[file://]*(/.*)".r
-    val hdfsPathRE = "hdfs://(/.*)".r
-    val confFile = pathToConf.toLowerCase() match {
+    val localPathRE = "[file://|FILE://]*(/.*)".r
+    val hdfsPathRE = "[hdfs://|HDFS://](/.*)".r
+    val confFile = pathToConf match {
       case localPathRE(p) => new File(p)
       case hdfsPathRE(p) => {
         val path = new Path(p)
