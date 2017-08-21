@@ -26,11 +26,11 @@ object Utils {
   }
 
   def loadConf(pathToConf: String): Config = {
-    val localPathRE = "[file://|FILE://]*(/.*)".r
-    val hdfsPathRE = "[hdfs://|HDFS://](/.*)".r
+    val localPathRE = "(file|FILE)://(/.*)".r
+    val hdfsPathRE = "(hdfs|HDFS)://(/.*)".r
     val confFile = pathToConf match {
-      case localPathRE(p) => new File(p)
-      case hdfsPathRE(p) => {
+      case localPathRE(fs, p) => new File(p)
+      case hdfsPathRE(fs, p) => {
         val path = new Path(p)
         val localTempFile = File.createTempFile(path.getName, "tmp")
         localTempFile.deleteOnExit()
