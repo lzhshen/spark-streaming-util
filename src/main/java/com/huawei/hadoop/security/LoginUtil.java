@@ -13,6 +13,6 @@ public class LoginUtil {
     public synchronized static void login(String userPrincipal, String userKeytabPath, String krb5ConfPath, Configuration conf)
         throws Exception
     {
-        LOG.info("Fake LoginUtil is triggered");
+        LOG.info("Fake LoginUtil is triggered.");
     }
 }

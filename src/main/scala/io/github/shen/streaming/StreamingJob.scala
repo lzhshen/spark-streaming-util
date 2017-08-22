@@ -57,9 +57,12 @@ class StreamingJob(beamFileLocation: String) {
     jobConfig.securityConfig match {
       case Some(config) => {
         val hadoopConf: Configuration = new Configuration()
+        LogHolder.log.info(s"Login Information, userPrincipal: ${config.userPrinciple}; userKeytabPath: ${config.userKeytabPath}, krb5ConfPath: ${config.krb5ConfPath}")
         LoginUtil.login(config.userPrinciple, config.userKeytabPath, config.krb5ConfPath, hadoopConf)
       }
-      case None => {}
+      case None => {
+        LogHolder.log.info("Ignore login as there is no 'security' info in configuration file!")
+      }
     }
   }
 
