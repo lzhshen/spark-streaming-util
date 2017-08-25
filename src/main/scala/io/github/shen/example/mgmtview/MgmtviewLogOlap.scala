@@ -29,7 +29,11 @@ object MgmtviewLogOlap {
 
     // read orgnization map file and broadcast it
     val hdfsInputBeam = streamingJob.inputBeams(1).asInstanceOf[HdfsInputBeam]
-    val orgMap = hdfsInputBeam.read().collect().drop(1).map(OrgInfoRec(_)).map(o => (o.InsID, o)).toMap
+    val orgMap = hdfsInputBeam.read().collect().drop(1)
+      .map(OrgInfoRec(_))
+      .filter(_.nonEmpty)
+      .map(o => (o.get.InsID, o))
+      .toMap
     val orgMapBC = streamingJob.sc.broadcast(orgMap)
 
     // read data from kafka topcis and apply transformations
@@ -37,7 +41,7 @@ object MgmtviewLogOlap {
     val lines = kafkaInputBeam.read().map(_.value())
     val docs = lines
       .transform(extractMessageFromFilebeatLog)
-      .map(MgmtviewLogRec(_))
+      .transform(toMgmtviewLogRec)
       .transform(joinWithOrgMap(orgMapBC))
       .transform(toJsonString)
 
@@ -64,15 +68,23 @@ object MgmtviewLogOlap {
         }
         case _ => ""
       }
+      // print malformed data to log
+      if (msg == null || msg.length == 0) {
+        LogHolder.log.info(s"Invalid json format! Data: $line")
+      }
       msg
-    })
+    }).filter(s => s != null && s.length > 0)
+  }
+
+  val toMgmtviewLogRec = (lines : RDD[String]) => {
+    lines.map(MgmtviewLogRec(_)).filter(_.nonEmpty)
   }
 
   val joinWithOrgMap =
-    (orgMap: Broadcast[Map[String, OrgInfoRec]]) => (mgmtviewLogRecs: RDD[MgmtviewLogRec]) =>
+    (orgMap: Broadcast[Map[String, Option[OrgInfoRec]]]) => (mgmtviewLogRecs: RDD[Option[MgmtviewLogRec]]) =>
     {
       mgmtviewLogRecs.map(rec => {
-        MgmtviewLogRecWithOrg(rec, orgMap.value.getOrElse(rec.insId, OrgInfoRec()))
+        MgmtviewLogRecWithOrg(rec.get, orgMap.value.getOrElse(rec.get.insId, OrgInfoRec()).get)
       })
     }
 

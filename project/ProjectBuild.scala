@@ -80,8 +80,9 @@ object ProjectBuild extends Build {
     "org.apache.spark" %% "spark-streaming-kafka-0-10" % Versions.spark,
     "com.github.benfradet" %% "spark-kafka-0-10-writer" % "0.2.0",
 
-    "org.slf4j" % "slf4j-log4j12" % "1.7.21",
-    "org.slf4j" % "slf4j-api" % "1.7.21",
+    "org.slf4j" % "slf4j-log4j12" % "1.7.21" % "runtime",
+    "org.slf4j" % "slf4j-api" % "1.7.21" % "provided",
+    "org.slf4j" % "slf4j-nop" % "1.7.21" % "test",
 
     "com.typesafe" % "config" % "1.2.1",
     //"net.ceedubs" %% "ficus" % "1.1.2",
@@ -93,6 +94,7 @@ object ProjectBuild extends Build {
     "org.slf4j" % "slf4j-log4j12"
   )
 */
+
   lazy val main = Project(projectName, base = file("."))
     .settings(commonSettings: _*)
     //.settings(assemblySettings: _*)
